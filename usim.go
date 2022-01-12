@@ -262,6 +262,7 @@ func (u USIM) GenAuthResMilenage(rand, autn [16]byte) (rest [8]byte, ik [16]byte
 	if err = u.gen_auth_res_milenage(rand, autn); err != nil {
 		return
 	} else {
+		rest = u.res
 		ik = u.ik
 		ck = u.ck
 		auts = u.auts
