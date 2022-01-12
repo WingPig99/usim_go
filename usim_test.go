@@ -2,7 +2,6 @@ package usim_go
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 )
 
@@ -98,5 +97,4 @@ func Test_gen_auth_res_milenage(t *testing.T) {
 	if !bytes.Equal(u.ik[:], ik) {
 		t.Errorf("CK failed. expect %X, got %X\n", ik, u.ik)
 	}
-	fmt.Printf("AUTN: %X\n", autn_enb)
 }

@@ -144,10 +144,12 @@ type USIM struct {
 	mcc      uint16
 	mccStr   string
 	// rest
-	ak   [6]byte
-	ik   [16]byte
-	ck   [16]byte
-	auts [14]byte
+	ak         [6]byte
+	ik         [16]byte
+	ck         [16]byte
+	res        [8]byte
+	auts       [14]byte
+	ak_xor_sqn [6]byte
 }
 
 func InitUSIM(algo Algo, imei string, imsi string, k string, op string, opc string) (u USIM, err error) {
@@ -217,7 +219,7 @@ func (u *USIM) fetch_rest() {
 	auts_ := C.GoBytes(unsafe.Pointer(&C.auts), 14)
 	copy(u.auts[:], auts_)
 }
-func (u USIM) gen_auth_res_xor(rand, autn [16]byte) {
+func (u *USIM) gen_auth_res_xor(rand, autn [16]byte) {
 	C.auth_algo = C.auth_algo_xor
 	u.pass_k_to_c()
 	u.pass_op_to_c()
@@ -235,13 +237,13 @@ func (u USIM) gen_auth_res_xor(rand, autn [16]byte) {
 
 }
 
-func (u USIM) gen_auth_res_milenage(rand, autn [16]byte) error {
+func (u *USIM) gen_auth_res_milenage(rand, autn [16]byte) error {
 	C.auth_algo = C.auth_algo_xor
 	u.pass_k_to_c()
 	u.pass_opc_to_c()
 	u.pass_amf_to_c()
-	res := [16]byte{0x00}
-	res_len := 16
+	res := [8]byte{0x00}
+	res_len := 8
 	ak_xor_sqn := [6]byte{}
 	tmp := C.int(res_len)
 	a := C.gen_auth_res_milenage((*C.uchar)(&rand[0]), (*C.uchar)(&autn[0]), (*C.uchar)(&res[0]), (*C.int)(&tmp), (*C.uchar)(&ak_xor_sqn[0]))
@@ -250,14 +252,16 @@ func (u USIM) gen_auth_res_milenage(rand, autn [16]byte) error {
 		return errors.New("gen_auth_res_milenage failed")
 	} else {
 		u.fetch_rest()
+		u.res = res
+		u.ak_xor_sqn = ak_xor_sqn
 	}
 	return nil
 }
 
-func (u USIM) GenAuthResMilenage(rand, autn [16]byte) (ik [16]byte, ck [16]byte, auts [14]byte, err error) {
+func (u USIM) GenAuthResMilenage(rand, autn [16]byte) (rest [8]byte, ik [16]byte, ck [16]byte, auts [14]byte, err error) {
 	if err = u.gen_auth_res_milenage(rand, autn); err != nil {
 		return
-	}else{
+	} else {
 		ik = u.ik
 		ck = u.ck
 		auts = u.auts
