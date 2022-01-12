@@ -235,7 +235,7 @@ func (u USIM) gen_auth_res_xor(rand, autn [16]byte) {
 
 }
 
-func (u USIM) gen_auth_res_milenage(rand, autn [16]byte) {
+func (u USIM) gen_auth_res_milenage(rand, autn [16]byte) error {
 	C.auth_algo = C.auth_algo_xor
 	u.pass_k_to_c()
 	u.pass_opc_to_c()
@@ -247,7 +247,20 @@ func (u USIM) gen_auth_res_milenage(rand, autn [16]byte) {
 	a := C.gen_auth_res_milenage((*C.uchar)(&rand[0]), (*C.uchar)(&autn[0]), (*C.uchar)(&res[0]), (*C.int)(&tmp), (*C.uchar)(&ak_xor_sqn[0]))
 	if a != 0 {
 		log.Println("call C.gen_auth_res_milenage failed")
+		return errors.New("gen_auth_res_milenage failed")
 	} else {
 		u.fetch_rest()
 	}
+	return nil
+}
+
+func (u USIM) GenAuthResMilenage(rand, autn [16]byte) (ik [16]byte, ck [16]byte, auts [14]byte, err error) {
+	if err = u.gen_auth_res_milenage(rand, autn); err != nil {
+		return
+	}else{
+		ik = u.ik
+		ck = u.ck
+		auts = u.auts
+	}
+	return
 }
