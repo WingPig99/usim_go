@@ -130,7 +130,7 @@ func InitPcscUSIM(seq int) (u USIM, err error) {
 		return
 	} else {
 		// to do: handle multiple readers choices
-		logrus.Errorf("multiple readers found, using the %d\n", seq)
+		logrus.Infof("multiple readers found, using the %d\n", seq)
 		u.reader = readers[seq]
 		// return
 	}

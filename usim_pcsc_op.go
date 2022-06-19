@@ -151,7 +151,7 @@ func getIMSI(ctx *smartcard.Card) (string, error) {
 		logrus.Error("Select USIM APP file failed: ", err)
 	}
 	// reading IMSI
-	logrus.Info("SCARD: reading IMSI from (GSM) EF-IMSI")
+	logrus.Debug("SCARD: reading IMSI from (GSM) EF-IMSI")
 	if resp, err = _select_file(ctx, SCARD_FILE_GSM_EF_IMSI, cardType, nil); err != nil {
 		logrus.Debug("reading SCARD_FILE_GSM_EF_IMSI failed: ", err)
 		return "", errors.New("reading SCARD_FILE_GSM_EF_IMSI failed")
@@ -217,7 +217,6 @@ func getMSISDN(ctx *smartcard.Card) (msisdn string, err error) {
 			_select_file(ctx, SCARD_FILE_MF, SCARD_USIM, nil)
 			_select_file(ctx, 0, SCARD_USIM, aid)
 			_select_file(ctx, SCARD_FILE_GSM_EF_MSISDN, SCARD_USIM, nil)
-			logrus.Debug("reading MSISDN failed: ", err)
 			return "", errors.New("reading MSISDN failed")
 
 		}
@@ -234,8 +233,12 @@ func getMSISDN(ctx *smartcard.Card) (msisdn string, err error) {
 	}
 	resp = resp[16:]
 	swapHex(resp[2:])
-	dailLen := (resp[0]-2)*2 + 1
-	msisdn = hex.EncodeToString(resp[2:])[:dailLen]
+	dailLen := int((resp[0]-2)*2 + 1)
+	if dailLen <= len(hex.EncodeToString(resp[2:])) {
+		msisdn = hex.EncodeToString(resp[2:])[:dailLen]
+	} else {
+		err = errors.New("reading MSISDN failed")
+	}
 	return
 }
 
@@ -264,14 +267,11 @@ func AKAVerify(ctx *smartcard.Card, simType int, aid []byte, rand, auth []byte) 
 	logrus.Debug("Got response:\n", hex.Dump(resp))
 	if len(resp) == 2 && resp[0] == 0x98 && resp[1] == 0x62 {
 		// Authentication error, application specific
-		errStr := "SCARD: UMTS auth failed - MAC != XMAC"
-		logrus.Error(errStr)
 		err = errors.New("SCARD: UMTS auth failed - MAC != XMAC")
 		return
 	}
 	if len(resp) != 2 || resp[0] != 0x61 {
 		errStr := fmt.Sprintf("SCARD: unexpected response for UMTS auth request (len=%d resp=0x%02X%02X)", len(resp), resp[0], resp[1])
-		logrus.Error(errStr)
 		err = errors.New(errStr)
 		return
 	}

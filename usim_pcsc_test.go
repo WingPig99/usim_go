@@ -2,7 +2,6 @@ package usim_go
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/sf1/go-card/smartcard"
@@ -10,10 +9,10 @@ import (
 )
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
+	// logrus.SetLevel(logrus.DebugLevel)
 }
 func TestISIM_Authentication(t *testing.T) {
-	u, err := InitPcscUSIM(-1)
+	u, err := InitPcscUSIM(1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,11 +37,8 @@ func TestReadIMSI(t *testing.T) {
 	if len(readers) == 0 {
 		t.Error("please insert smart card")
 		return
-	} else if len(readers) == 1 {
-		reader = readers[0]
 	} else {
-		// to do: handle multiple readers choices
-		t.Error("multiple readers not supported")
+		reader = readers[0]
 	}
 	//
 	card, err := reader.Connect()
@@ -53,7 +49,7 @@ func TestReadIMSI(t *testing.T) {
 	if resp, err = getIMSI(card); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(resp)
+	logrus.Debug(resp)
 }
 func TestReadICCID(t *testing.T) {
 	var resp string
@@ -71,11 +67,8 @@ func TestReadICCID(t *testing.T) {
 	if len(readers) == 0 {
 		t.Error("please insert smart card")
 		return
-	} else if len(readers) == 1 {
-		reader = readers[0]
 	} else {
-		// to do: handle multiple readers choices
-		t.Error("multiple readers not supported")
+		reader = readers[0]
 	}
 	//
 	card, err := reader.Connect()
@@ -86,7 +79,7 @@ func TestReadICCID(t *testing.T) {
 	if resp, err = getICCID(card); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(resp)
+	logrus.Debug(resp)
 }
 
 func TestReadMSISDN(t *testing.T) {
@@ -105,11 +98,8 @@ func TestReadMSISDN(t *testing.T) {
 	if len(readers) == 0 {
 		t.Error("please insert smart card")
 		return
-	} else if len(readers) == 1 {
-		reader = readers[0]
 	} else {
-		// to do: handle multiple readers choices
-		t.Error("multiple readers not supported")
+		reader = readers[0]
 	}
 	//
 	card, err := reader.Connect()
@@ -120,7 +110,7 @@ func TestReadMSISDN(t *testing.T) {
 	if resp, err = getMSISDN(card); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(resp)
+	logrus.Debug(resp)
 }
 func TestAKAVerify(t *testing.T) {
 	var resp string
@@ -138,11 +128,8 @@ func TestAKAVerify(t *testing.T) {
 	if len(readers) == 0 {
 		t.Error("please insert smart card")
 		return
-	} else if len(readers) == 1 {
-		reader = readers[0]
 	} else {
-		// to do: handle multiple readers choices
-		t.Error("multiple readers not supported")
+		reader = readers[0]
 	}
 	//
 	card, err := reader.Connect()
@@ -157,7 +144,7 @@ func TestAKAVerify(t *testing.T) {
 	} else {
 		logrus.Info(res, ik, ck, auts)
 	}
-	fmt.Println(resp)
+	logrus.Debug(resp)
 }
 
 func TestParseAKA(t *testing.T) {
@@ -185,11 +172,8 @@ func TestGSMAlg(t *testing.T) {
 	if len(readers) == 0 {
 		t.Error("please insert smart card")
 		return
-	} else if len(readers) == 1 {
-		reader = readers[0]
 	} else {
-		// to do: handle multiple readers choices
-		t.Error("multiple readers not supported")
+		reader = readers[0]
 	}
 	//
 	card, err := reader.Connect()
@@ -201,7 +185,7 @@ func TestGSMAlg(t *testing.T) {
 	if sres, kc, err := GSMAlg(card, SCARD_USIM, rand_enb[:]); err != nil {
 		t.Error(err)
 	} else {
-		logrus.Info("XRES: ", hex.EncodeToString(sres), "KC: ", hex.EncodeToString(kc))
+		logrus.Debug("XRES: ", hex.EncodeToString(sres), "KC: ", hex.EncodeToString(kc))
 	}
-	fmt.Println(resp)
+	logrus.Debug(resp)
 }

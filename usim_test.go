@@ -76,7 +76,7 @@ AUTN    : d7.44.51.9b.25.aa.80.00.84.ba.37.b0.f6.73.4d.d1.
 KASME   : a8.27.57.5e.ea.1a.10.17.3a.a1.bf.ce.4b.0c.21.85.e0.51.ef.bd.91.7f.fe.f5.1f.74.29.61.f9.03.7a.35.
 */
 func Test_gen_auth_res_milenage(t *testing.T) {
-	u, err := InitSoftUSIM(Milenage, "356092040793011", "208930000000001", "8BAF473F2F8FD09487CCCBD7097C6862", "11111111111111111111111111111111", "",true)
+	u, err := InitSoftUSIM(Milenage, "356092040793011", "208930000000001", "8BAF473F2F8FD09487CCCBD7097C6862", "11111111111111111111111111111111", "", true)
 	u.compute_opc()
 	if err != nil {
 		t.Error(err)
